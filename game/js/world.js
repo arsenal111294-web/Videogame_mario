@@ -63,19 +63,38 @@
 
     /* Статичные тайлы пререндерятся в большой холст */
     prerender() {
-      this.layer = A.cnv(this.pw, this.ph);
-      const x = this.layer.getContext('2d');
-      for (let ty = 0; ty < this.h; ty++) for (let tx = 0; tx < this.w; tx++) this.redrawTile(tx, ty, x);
+      // холст делится на куски по 512 единиц: высокое разрешение без гигантских холстов
+      const R = G.RES, CW = 512;
+      this.chunks = [];
+      for (let x0 = 0; x0 < this.pw; x0 += CW) {
+        const w = Math.min(CW, this.pw - x0);
+        const c = A.cnv(w * R, this.ph * R);
+        const x = c.getContext('2d');
+        x.setTransform(R, 0, 0, R, -x0 * R, 0);
+        x.imageSmoothingEnabled = true;
+        this.chunks.push({ x0, w, c, x });
+      }
+      this.chunkW = CW;
+      for (let ty = 0; ty < this.h; ty++) for (let tx = 0; tx < this.w; tx++) this.redrawTile(tx, ty);
     }
-    redrawTile(tx, ty, ctx) {
+    chunkAt(px) { return this.chunks[Math.floor(px / this.chunkW)]; }
+    drawLayer(x, sx, sy, sw, sh, dx, dy) {
+      const R = G.RES;
+      for (const ch of this.chunks) {
+        const a = Math.max(sx, ch.x0), b = Math.min(sx + sw, ch.x0 + ch.w);
+        if (b <= a) continue;
+        x.drawImage(ch.c, (a - ch.x0) * R, sy * R, (b - a) * R, sh * R, dx + (a - sx), dy, b - a, sh);
+      }
+    }
+    redrawTile(tx, ty) {
       if (tx < 0 || ty < 0 || tx >= this.w || ty >= this.h) return;
-      const x = ctx || this.layer.getContext('2d');
+      const x = this.chunkAt(tx * T).x;
       const px = tx * T, py = ty * T;
       x.clearRect(px, py, T, T);
       const ch = this.tiles[ty * this.w + tx];
       if (ch === ' ' || ch === 'X' || ch === 'w' || ch === '~' || ch === '%' || ch === '*' || A.isBlock(ch)) return;
       const rnd = G.rng(tx * 7919 + ty * 104729 + 13);
-      A.drawTile(x, ch, px, py, this.theme, this.neighbors(tx, ty), rnd);
+      A.drawTile(x, ch, px, py, this.theme, this.neighbors(tx, ty), rnd, this.def.theme);
     }
 
     add(e) { e.world = this; this.entities.push(e); if (e.init) e.init(); return e; }
@@ -213,7 +232,7 @@
     /* ---------- Отрисовка ---------- */
     render(x, W, H) {
       const t = this.time;
-      let cx = Math.round(this.camX), cy = Math.round(this.camY);
+      let cx = G.snap(this.camX), cy = G.snap(this.camY);
       if (this.shake > 0) { cx += Math.round(G.rr(-2, 2) * Math.min(1, this.shake * 4)); cy += Math.round(G.rr(-2, 2) * Math.min(1, this.shake * 4)); }
       A.drawBackground(x, this.def.bg, cx, cy, W, H, t);
       if (this.def.rain) this.drawRainBack(x, W, H);
@@ -229,7 +248,7 @@
       // пререндер тайлов
       const sx = Math.max(0, cx), sy = Math.max(0, cy);
       const sw = Math.min(W, this.pw - sx), sh = Math.min(H, this.ph - sy);
-      if (sw > 0 && sh > 0) x.drawImage(this.layer, sx, sy, sw, sh, sx, sy, sw, sh);
+      if (sw > 0 && sh > 0) this.drawLayer(x, sx, sy, sw, sh, sx, sy);
       // динамические тайлы
       const tx0 = Math.floor(cx / T) - 1, tx1 = Math.ceil((cx + W) / T) + 1;
       const ty0 = Math.floor(cy / T) - 1, ty1 = Math.ceil((cy + H) / T) + 1;
@@ -247,7 +266,7 @@
         const ch = this.tile(b.tx, b.ty);
         if (ch === 'U' || ch === 'B') {
           const off = -Math.sin((b.t / 0.15) * Math.PI) * 5;
-          x.drawImage(this.layer, b.tx * T, b.ty * T, T, T, b.tx * T, b.ty * T + off, T, T);
+          this.drawLayer(x, b.tx * T, b.ty * T, T, T, b.tx * T, b.ty * T + off);
         }
       }
       // сущности
@@ -307,7 +326,9 @@
         hole(lx, ly, l.r + Math.sin(this.time * 6 + l.x) * 2);
       }
       for (const e of this.entities) if (e.light && !e.dead) hole(e.x + e.w / 2 - cx, e.y + e.h / 2 - cy, e.light);
-      x.drawImage(this.darkC, 0, 0);
+      x.imageSmoothingEnabled = true;
+      x.drawImage(this.darkC, 0, 0, W, H);
+      x.imageSmoothingEnabled = false;
     }
 
     drawRainBack(x, W, H) { x.fillStyle = 'rgba(20,30,50,0.25)'; x.fillRect(0, 0, W, H); }

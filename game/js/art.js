@@ -56,9 +56,22 @@
   function flip(c) {
     const f = cnv(c.width, c.height), x = f.getContext('2d');
     x.translate(c.width, 0); x.scale(-1, 1); x.drawImage(c, 0, 0);
+    f.k = c.k || 1; f.ax = c.ax; f.ay = c.ay;
     return f;
   }
   A.flip = flip;
+
+  /* Вывод спрайта с учётом его плотности (k пикселей на игровую единицу) */
+  A.blit = function (x, c, dx, dy) {
+    if (!c) return;
+    const k = c.k || 1;
+    x.drawImage(c, G.snap(dx), G.snap(dy), c.width / k, c.height / k);
+  };
+  A.blitPart = function (x, c, sx, sy, sw, sh, dx, dy) {
+    if (!c) return;
+    const k = c.k || 1;
+    x.drawImage(c, sx * k, sy * k, sw * k, sh * k, G.snap(dx), G.snap(dy), sw, sh);
+  };
 
   /* ---------- Палитры ---------- */
   const SKIN = '#f0bf93', SKIN2 = '#c98f68';
@@ -324,8 +337,60 @@
     };
   };
 
+  /* ---------- 3D-ассеты из Blender (assets/manifest.js) ---------- */
+  A.img = {};      // загруженные картинки по относительному пути
+  A.props = {};    // декорации: имя → холст
+  A.tiles = null;  // тайлы
+  A.bgImg = {};    // слои фона
+  const loadImg = (src) => new Promise((res) => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = () => res(null);
+    im.src = 'assets/' + src;
+  });
+  function slice(im, a) {
+    const k = a.k, cw = a.cell[0] * k, ch = a.cell[1] * k;
+    return a.names.map((n, i) => {
+      const c = cnv(cw, ch);
+      c.getContext('2d').drawImage(im, i * cw, 0, cw, ch, 0, 0, cw, ch);
+      c.k = k; c.ox = a.ox || 0; c.oy = a.oy || 0;
+      return [n, c];
+    });
+  }
+  A.loadAssets = function (onProgress) {
+    const M = window.ANAKOPIA_ASSETS;
+    if (!M) return Promise.resolve(false);
+    const jobs = [];
+    let done = 0, total = 0;
+    const job = (src, fn) => { total++; jobs.push(loadImg(src).then((im) => { done++; if (onProgress) onProgress(done / total); if (im) fn(im); })); };
+    for (const key in M.atlases || {}) {
+      const a = M.atlases[key];
+      job(a.file, (im) => slice(im, a).forEach(([n, c]) => { LIB[n] = [c, flip(c)]; }));
+    }
+    for (const key in M.props || {}) {
+      const a = M.props[key];
+      job(a.file, (im) => { const [[, c]] = slice(im, a); A.props[key] = [c, flip(c)]; });
+    }
+    if (M.tiles) {
+      A.tiles = { ground: {}, common: {}, k: M.tiles.k };
+      for (const th in M.tiles.ground) {
+        const g = M.tiles.ground[th];
+        A.tiles.ground[th] = {};
+        job(g.body, (im) => { A.tiles.ground[th].body = im; });
+        job(g.top, (im) => { A.tiles.ground[th].top = im; });
+      }
+      for (const n in M.tiles.common) job(M.tiles.common[n], (im) => { A.tiles.common[n] = im; });
+    }
+    for (const n in M.bg || {}) job(M.bg[n], (im) => { A.bgImg[n] = im; });
+    if (M.ui) for (const n in M.ui) A.icons[n] = 'assets/' + M.ui[n];
+    if (M.portraits) A.portraitFiles = M.portraits;
+    return Promise.all(jobs).then(() => { A.applyBackgrounds(); return true; });
+  };
+  A.prop = (name, face) => { const p = A.props[name]; return p ? p[face < 0 ? 1 : 0] : null; };
+
   /* ---------- Портреты для диалогов ---------- */
   A.portrait = function (who) {
+    if (A.portraitFiles && A.portraitFiles[who]) return 'assets/' + A.portraitFiles[who];
     const c = cnv(96, 96), x = c.getContext('2d');
     const bg = { astamur: '#6e2a20', amra: '#22553a', leon: '#4a2a6a', daur: '#5a4632', marwan: '#5a1414', narrator: '#3a2a1a', master: '#3a2a2a', abnauaiu: '#1a2a1a' }[who] || '#333';
     x.fillStyle = bg; x.fillRect(0, 0, 96, 96);
@@ -404,8 +469,36 @@
   }
 
   /* Рисует статичный тайл в (px,py) с учётом соседей */
-  A.drawTile = function (x, ch, px, py, th, nb, rnd) {
+  const COMMON_TILE = { S: 'stone', B: 'brick', U: 'used', '=': 'plank', H: 'ladder', '^': 'spikes', L: 'crate', W: 'towerwall' };
+  A.drawTileImg = function (x, ch, px, py, nb, themeName) {
+    const TL = A.tiles;
+    if (!TL) return false;
+    const T = 16, k = TL.k, tx = Math.round(px / T), ty = Math.round(py / T);
+    if (ch === '#' || ch === 'C') {
+      const g = TL.ground[ch === 'C' ? 'cave' : themeName] || TL.ground[themeName];
+      if (!g || !g.body) return false;
+      const bx = ((tx % 4) + 4) % 4, by = ((ty % 4) + 4) % 4;
+      x.drawImage(g.body, bx * T * k, by * T * k, T * k, T * k, px, py, T, T);
+      if (!nb.up && g.top) x.drawImage(g.top, bx * T * k, 0, T * k, T * k, px, py, T, T);
+      const sh = (side, w) => { const gr = x.createLinearGradient(side === 'l' ? px : px + T, 0, side === 'l' ? px + w : px + T - w, 0); gr.addColorStop(0, 'rgba(0,0,0,0.35)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gr; x.fillRect(side === 'l' ? px : px + T - w, py, w, T); };
+      if (!nb.left) sh('l', 4);
+      if (!nb.right) sh('r', 5);
+      if (!nb.down) { const gr = x.createLinearGradient(0, py + T, 0, py + T - 4); gr.addColorStop(0, 'rgba(0,0,0,0.35)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gr; x.fillRect(px, py + T - 4, T, 4); }
+      return true;
+    }
+    const n = COMMON_TILE[ch];
+    const im = n && TL.common[n];
+    if (!im) return false;
+    if (n === 'stone') {
+      const bx = ((tx % 2) + 2) % 2, by = ((ty % 2) + 2) % 2;
+      x.drawImage(im, bx * T * k, by * T * k, T * k, T * k, px, py, T, T);
+    } else x.drawImage(im, 0, 0, im.width, im.height, px, py, T, T);
+    return true;
+  };
+
+  A.drawTile = function (x, ch, px, py, th, nb, rnd, themeName) {
     const T = 16;
+    if (ch !== '*' && ch !== 'K' && ch !== 'T' && A.drawTileImg(x, ch, px, py, nb, themeName)) return;
     switch (ch) {
       case '#': case 'C': {
         noiseFill(x, px, py, T, T, th.d, [th.d2, th.d3], rnd, 0.12);
@@ -529,6 +622,11 @@
         x.fillStyle = '#e84a1a'; x.fillRect(px + i * 4, py + 14 - h, 4, h);
         x.fillStyle = '#ffb030'; x.fillRect(px + i * 4 + 1, py + 15 - h + 2, 2, h - 2);
       }
+    } else if (A.isBlock(ch) && A.tiles && A.tiles.common.block) {
+      const im = A.tiles.common.block;
+      x.drawImage(im, 0, 0, im.width, im.height, px, py, T, T);
+      const s = (Math.sin(t * 4 + px * 0.1) + 1) / 2;
+      x.fillStyle = `rgba(255,240,180,${0.08 + s * 0.14})`; x.fillRect(px + 1, py + 1, T - 2, T - 2);
     } else if (A.isBlock(ch)) {
       const sh = (Math.floor(t * 3) % 3);
       x.fillStyle = OUT; x.fillRect(px, py, T, T);
@@ -644,6 +742,23 @@
     ] },
   };
 
+  const BG_LAYERS = {
+    coast: [['coast_0', 0.06], ['coast_1', 0.16], ['coast_2', 0.38]],
+    gorge: [['gorge_0', 0.06], ['gorge_1', 0.16], ['gorge_2', 0.38]],
+    forest: [['forest_0', 0.06], ['forest_1', 0.2], ['forest_2', 0.42]],
+    fortress: [['fortress_0', 0.05], ['fortress_1', 0.1], ['fortress_2', 0.36]],
+    cave: [['cave_0', 0.2], ['cave_1', 0.4]],
+    camp: [['camp_0', 0.05], ['camp_1', 0.28]],
+    rain: [['rain_0', 0.07], ['rain_1', 0.32]],
+    gates: [['gates_0', 0.05], ['gates_1', 0.18]],
+  };
+  A.applyBackgrounds = function () {
+    for (const name in BG_LAYERS) {
+      const ls = BG_LAYERS[name].map(([n, f]) => A.bgImg[n] ? { c: A.bgImg[n], f, y: 0, w: 512, h: 240, img: true } : null);
+      if (ls.every(Boolean) && BGS[name]) BGS[name]._layers = ls;
+    }
+  };
+
   A.makeBackground = function (name) {
     const b = BGS[name] || BGS.coast;
     if (!b._layers) b._layers = b.layers();
@@ -665,19 +780,33 @@
     if (b.moon) { x.fillStyle = '#f4f0d8'; x.beginPath(); x.arc(W * 0.78, 40, 14, 0, Math.PI * 2); x.fill(); x.fillStyle = b.sky[0]; x.beginPath(); x.arc(W * 0.78 + 6, 36, 12, 0, Math.PI * 2); x.fill(); }
     if (b.sun) { x.fillStyle = b.sun; x.beginPath(); x.arc(W * 0.8, 46, 16, 0, Math.PI * 2); x.fill(); x.fillStyle = 'rgba(255,250,220,0.25)'; x.beginPath(); x.arc(W * 0.8, 46, 24, 0, Math.PI * 2); x.fill(); }
     b._layers.forEach((L) => {
-      const lw = L.c.width;
+      const lw = L.w || L.c.width, lh = L.h || L.c.height;
       let ox = -((camX * L.f) % lw);
       if (ox > 0) ox -= lw;
-      const oy = L.tileY ? -((camY * L.f) % L.c.height) : Math.round(-camY * L.f * 0.3) + (L.y || 0);
-      for (let px = Math.floor(ox); px < W; px += lw) {
-        if (L.tileY) { for (let py = oy - L.c.height; py < H; py += L.c.height) x.drawImage(L.c, px, Math.floor(py)); }
-        else x.drawImage(L.c, px, oy);
+      const oy = L.tileY ? -((camY * L.f) % lh) : G.snap(-camY * L.f * 0.3) + (L.y || 0);
+      if (L.img) x.imageSmoothingEnabled = true;
+      for (let px = G.snap(ox); px < W; px += lw) {
+        if (L.tileY) { for (let py = oy - lh; py < H; py += lh) x.drawImage(L.c, px, G.snap(py), lw, lh); }
+        else x.drawImage(L.c, px, oy, lw, lh);
       }
+      x.imageSmoothingEnabled = false;
     });
   };
 
   /* ---------- Декорации (дома, шатры, деревья, ворота) ---------- */
+  const PROP_PLACE = { house: [24, 'house'], tree: [9, 'tree'], darktree: [9, 'darktree'], cypress: [8, 'cypress'] };
   A.drawDecor = function (x, d, px, py, t) {
+    let pn = null, cx0 = 0;
+    if (PROP_PLACE[d.type]) { cx0 = PROP_PLACE[d.type][0]; pn = PROP_PLACE[d.type][1]; }
+    if (d.type === 'tent') { cx0 = 24; pn = d.col === '#b8ac90' || d.col === '#c0b498' ? 'tent2' : d.col === '#d0c4a8' ? 'tent3' : 'tent'; }
+    const pc = pn && A.prop(pn, 1);
+    if (pc) {
+      const w = pc.width / pc.k, h = pc.height / pc.k;
+      x.imageSmoothingEnabled = true;
+      A.blit(x, pc, px + cx0 - w / 2, py - h + 1);
+      x.imageSmoothingEnabled = false;
+      return;
+    }
     switch (d.type) {
       case 'house': { // абхазский дом-апацха: плетёные стены, соломенная крыша
         x.fillStyle = OUT; x.fillRect(px - 1, py - 33, 50, 34);

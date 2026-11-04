@@ -17,7 +17,11 @@
       if (this.roarT <= 0 && !this.stopped) { this.roarT = 4 + Math.random() * 3; sfx('roar'); W.shake = 0.3; }
       if (!this.stopped && p && !p.dead && p.x < W.camX + 26) p.die('caught');
     }
-    draw(x, t) { A.drawAbnauaiu(x, this.x + 22, this.y + this.h, t, 1, 1); }
+    draw(x, t) {
+      const c = A.get('abnauaiu_' + (Math.floor(t * 6) % 4), 1);
+      if (c) { x.imageSmoothingEnabled = true; A.blit(x, c, this.x + 22 - 28, this.y + this.h - 70); x.imageSmoothingEnabled = false; }
+      else A.drawAbnauaiu(x, this.x + 22, this.y + this.h, t, 1, 1);
+    }
   }
   E.Abnauaiu = Abnauaiu;
 
@@ -195,6 +199,8 @@
     }
     draw(x) {
       const bx = Math.round(this.x), by = Math.round(this.y);
+      const pc = A.prop('cart', 1);
+      if (pc) { A.blit(x, pc, this.x - 2, this.y + this.h - 24 + 1); return; }
       x.fillStyle = '#1b1218'; x.fillRect(bx - 1, by + 5, 32, 11);
       x.fillStyle = '#7a4a26'; x.fillRect(bx, by + 6, 30, 9);
       x.fillStyle = '#d8c8a0'; x.beginPath(); x.ellipse(bx + 9, by + 5, 8, 6, 0, 0, 7); x.fill(); x.beginPath(); x.ellipse(bx + 21, by + 5, 8, 6, 0, 0, 7); x.fill();
@@ -382,12 +388,17 @@
       if (this.flashT > 0 && Math.floor(t * 20) % 2) x.globalAlpha = 0.4;
       if (this.mounted) {
         const fr = this.state === 'charge' || this.state === 'flee' ? ['a', 'b', 'c', 'b'][Math.floor(t * 12) % 4] : 'a';
-        const hc = A.get('whorse_' + fr, this.face);
-        const hx = Math.round(this.cx - 24), hy = Math.round(this.y + this.h - 30);
-        const top = A.get('marwan_stand', this.face);
+        const hx = this.cx - 24, hy = this.y + this.h - 30;
         if (this.state === 'aim') { x.save(); x.translate(this.cx, this.y + this.h); x.rotate(-this.face * 0.12); x.translate(-this.cx, -(this.y + this.h)); }
-        if (top) x.drawImage(top, 0, 0, 32, 24, hx + (this.face > 0 ? 6 : 10), hy - 18, 32, 24);
-        if (hc) x.drawImage(hc, hx, hy);
+        const moving = this.state === 'charge' || this.state === 'flee';
+        const mr = A.get('marwanhorse_' + (this.state === 'aim' ? 'rear' : moving ? fr : 'stand'), this.face);
+        if (mr) A.blit(x, mr, hx + (mr.ox || 0), hy + (mr.oy || 0));
+        else {
+          const hc = A.get('whorse_' + fr, this.face);
+          const top = A.get('marwan_stand', this.face);
+          if (top) A.blitPart(x, top, 0, 0, 32, 24, hx + (this.face > 0 ? 6 : 10), hy - 18);
+          if (hc) A.blit(x, hc, hx, hy);
+        }
         if (this.state === 'aim') x.restore();
       } else {
         const f = this.state === 'raise' ? 'attack' : this.state === 'lunge' ? 'attack' : this.state === 'defeated' ? 'stand' : Math.abs(this.vx) > 3 ? (Math.floor(t * 6) % 2 ? 'run1' : 'run2') : 'stand';
@@ -529,7 +540,7 @@
       x.fillStyle = '#1b1218'; [10, 32, 54].forEach((w) => { x.beginPath(); x.arc(bx + w, by + 23, 4, 0, 7); x.fill(); });
       // толкачи
       const leg = Math.floor(t * 6) % 2;
-      [22, 40].forEach((w) => { const c = A.get('soldier_' + (leg ? 'run1' : 'run2'), -1); if (c) x.drawImage(c, bx + w, by + 10); });
+      [22, 40].forEach((w) => { const c = A.get('soldier_' + (leg ? 'run1' : 'run2'), -1); if (c) A.blit(x, c, bx + w + (c.ox || 0), by + 10 + (c.oy || 0)); });
       x.globalAlpha = 1;
     }
   }

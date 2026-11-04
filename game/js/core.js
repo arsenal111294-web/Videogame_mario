@@ -3,7 +3,9 @@
 (function () {
   const G = (window.G = {});
   G.T = 16;            // размер тайла в пикселях
-  G.VH = 240;          // внутренняя высота экрана
+  G.VH = 240;          // высота экрана в игровых единицах
+  G.RES = 3;           // пикселей холста на игровую единицу (чёткая детальная графика)
+  G.snap = (v) => Math.round(v * G.RES) / G.RES;
   G.STEP = 1 / 60;     // фиксированный шаг симуляции
 
   G.clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -210,8 +212,8 @@
     canvas.addEventListener('pointerdown', (e) => {
       if (G.audio) G.audio.unlock();
       const r = canvas.getBoundingClientRect();
-      const x = ((e.clientX - r.left) / r.width) * canvas.width;
-      const y = ((e.clientY - r.top) / r.height) * canvas.height;
+      const x = ((e.clientX - r.left) / r.width) * (canvas.width / G.RES);
+      const y = ((e.clientY - r.top) / r.height) * (canvas.height / G.RES);
       I.taps.push({ x, y });
     });
   };

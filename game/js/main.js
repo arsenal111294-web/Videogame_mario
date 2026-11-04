@@ -478,6 +478,7 @@
 
     /* ---------- Отрисовка ---------- */
     render() {
+      ctx.setTransform(G.RES, 0, 0, G.RES, 0, 0);
       ctx.imageSmoothingEnabled = false;
       const w = this.world;
       if (w && (this.state === 'play' || this.state === 'paused' || this.state === 'completing' || this.state === 'complete' || this.state === 'over' || (this.state === 'story' && w))) {
@@ -488,17 +489,27 @@
       const t = this.time;
       const bg = this.state === 'story' && this.story ? this.story.bg : 'fortress';
       A.drawBackground(ctx, bg, t * 18, 0, W, H, t);
-      ctx.fillStyle = '#3a6a30'; ctx.fillRect(0, H - 28, W, 28);
-      ctx.fillStyle = '#58a040'; ctx.fillRect(0, H - 28, W, 4);
-      ctx.fillStyle = '#6e4526'; ctx.fillRect(0, H - 18, W, 18);
-      if (this.state === 'title' || this.state === 'menu' || this.state === 'ending') {
-        const fr = Math.floor(t * 2) % 2 ? 'stand' : 'stand';
-        const a = A.get('astamur_' + fr, 1), b = A.get('amra_' + fr, 1), l = A.get('leon_stand', -1);
-        ctx.save(); ctx.scale(2, 2);
-        if (a) ctx.drawImage(a, 20, (H - 28) / 2 - 15);
-        if (b) ctx.drawImage(b, 34, (H - 28) / 2 - 15);
-        if (l) ctx.drawImage(l, W / 2 - 36, (H - 28) / 2 - 15);
-        ctx.restore();
+      // земля из тайлов
+      const gy = H - 30;
+      for (let px = -((t * 18 * 0.9) % 16) - 16; px < W; px += 16) {
+        const nb = { up: false, left: true, right: true, down: true };
+        A.drawTile(ctx, '#', px, gy, A.THEMES.village, nb, G.rng(7), 'village');
+        A.drawTile(ctx, '#', px, gy + 16, A.THEMES.village, { up: true, left: true, right: true, down: true }, G.rng(9), 'village');
+      }
+      if (this.state === 'title' || this.state === 'menu' || this.state === 'ending' || this.state === 'boot') {
+        const run = ['run1', 'run2', 'run3', 'run4'][Math.floor(t * 8) % 4];
+        const fr = A.get('astamur_run3') ? run : 'stand';
+        const hero = (name, x0, face, f) => {
+          const c = A.get(name + '_' + f, face);
+          if (!c) return;
+          ctx.save(); ctx.translate(x0, gy); ctx.scale(2.2, 2.2);
+          ctx.imageSmoothingEnabled = true;
+          A.blit(ctx, c, -8 + (c.ox || 0), -15 + (c.oy || 0));
+          ctx.restore(); ctx.imageSmoothingEnabled = false;
+        };
+        hero('astamur', 38, 1, fr);
+        hero('amra', 70, 1, fr);
+        hero('leon', W - 40, -1, 'stand');
       }
     },
   });
@@ -508,7 +519,7 @@
     const vw = window.innerWidth, vh = window.innerHeight;
     const aspect = vw / Math.max(1, vh);
     W = G.clamp(Math.round(H * aspect), 320, 600);
-    canvas.width = W; canvas.height = H;
+    canvas.width = W * G.RES; canvas.height = H * G.RES;
     ctx.imageSmoothingEnabled = false;
     $('rotate').classList.toggle('hidden', aspect >= 1.05);
   }
@@ -602,7 +613,11 @@
     resize();
     G.setupTouch();
     setupUI();
-    game.toTitle();
+    const ld = $('loading');
+    A.loadAssets((p) => { if (ld) ld.querySelector('i').style.width = Math.round(p * 100) + '%'; }).then(() => {
+      if (ld) ld.classList.add('hidden');
+      game.toTitle();
+    });
     requestAnimationFrame(frame);
     // отладочный доступ для автотестов
     window.__anakopia = {

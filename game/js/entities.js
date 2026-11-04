@@ -13,7 +13,7 @@
     draw() {}
     spr(x, name, ox, oy, face) {
       const c = A.get(name, face === undefined ? this.face : face);
-      if (c) x.drawImage(c, Math.round(this.x + ox), Math.round(this.y + oy));
+      if (c) A.blit(x, c, this.x + ox + (c.ox || 0), this.y + oy + (c.oy || 0));
     }
   }
   E.Ent = Ent;
@@ -264,7 +264,8 @@
       if (this.dead) f = 'jump';
       else if (this.state === 'climb') f = Math.floor(this.animT * 8) % 2 ? 'climb1' : 'climb2';
       else if (!this.onGround) f = this.inWater ? (Math.floor(t * 4) % 2 ? 'run1' : 'run2') : 'jump';
-      else if (Math.abs(this.vx) > 8) f = ['run1', 'stand', 'run2', 'stand'][Math.floor(this.animT * 10) % 4];
+      else if (Math.abs(this.vx) > 8) f = A.get(h + '_run3') ? ['run1', 'run2', 'run3', 'run4'][Math.floor(this.animT * 10) % 4] : ['run1', 'stand', 'run2', 'stand'][Math.floor(this.animT * 10) % 4];
+      if (this.inv > 1.2 && A.get(h + '_hurt')) f = 'hurt';
       if (this.attackT > 0 && this.state !== 'climb') f = this.onGround ? 'attack' : 'attackj';
       if (this.wallDir) f = 'climb1';
       const face = this.wallDir ? -this.wallDir : this.face;
@@ -274,7 +275,7 @@
       }
       if (this.dead) {
         x.save(); x.translate(Math.round(this.cx), Math.round(this.cy)); x.scale(1, -1);
-        const c = A.get(h + '_' + f, face); if (c) x.drawImage(c, -8, -8); x.restore();
+        const c = A.get(h + '_' + f, face); if (c) A.blit(x, c, -8 + (c.ox || 0), -8 + (c.oy || 0)); x.restore();
         return;
       }
       if (this.hidden) x.globalAlpha = 0.55;
@@ -292,10 +293,12 @@
       x.save(); x.translate(hx, hy);
       const ang = face > 0 ? -1.6 + p * 2.2 : Math.PI + 1.6 - p * 2.2;
       x.rotate(ang);
-      x.fillStyle = '#1b1218'; x.fillRect(-1, -2, 14 * k, 4);
-      x.fillStyle = '#e8eef4'; x.fillRect(0, -1, 13 * k, 2);
-      x.fillStyle = '#ffffff'; x.fillRect(2, -1, 9 * k, 1);
-      x.fillStyle = '#c9a24a'; x.fillRect(-1, -3, 2, 6);
+      x.fillStyle = '#1b1218'; x.beginPath(); x.moveTo(-0.5, -1.4); x.lineTo(13 * k, -1); x.lineTo(14.5 * k, 0); x.lineTo(13 * k, 1); x.lineTo(-0.5, 1.4); x.fill();
+      x.fillStyle = '#dfe6ee'; x.beginPath(); x.moveTo(0, -0.8); x.lineTo(13 * k, -0.5); x.lineTo(14 * k, 0); x.lineTo(13 * k, 0.5); x.lineTo(0, 0.8); x.fill();
+      x.fillStyle = '#ffffff'; x.fillRect(1.5, -0.5, 10 * k, 0.4);
+      x.fillStyle = '#1b1218'; x.fillRect(-1.4, -2.6, 2.4, 5.2);
+      x.fillStyle = '#d8b04c'; x.fillRect(-1, -2.2, 1.6, 4.4);
+      x.fillStyle = '#5a3418'; x.fillRect(-4, -0.6, 3, 1.2);
       x.restore();
       if (p < 0.7) {
         x.strokeStyle = 'rgba(255,255,255,0.6)'; x.lineWidth = 2; x.beginPath();
@@ -305,22 +308,28 @@
     }
 
     drawBow(x, face) {
-      const bx = face > 0 ? this.x + this.w + 2 : this.x - 3;
-      x.strokeStyle = '#6a3e1a'; x.lineWidth = 2; x.beginPath();
-      if (face > 0) x.arc(bx - 3, this.y + 7, 7, -1.1, 1.1); else x.arc(bx + 3, this.y + 7, 7, Math.PI - 1.1, Math.PI + 1.1);
-      x.stroke();
-      x.strokeStyle = '#eee'; x.lineWidth = 1; x.beginPath(); x.moveTo(bx + (face > 0 ? 0 : 0), this.y + 1); x.lineTo(bx, this.y + 13); x.stroke();
+      const bx = face > 0 ? this.x + this.w + 3 : this.x - 3;
+      const cx = face > 0 ? bx - 4 : bx + 4, a0 = face > 0 ? -1.15 : Math.PI - 1.15, a1 = face > 0 ? 1.15 : Math.PI + 1.15;
+      x.lineCap = 'round';
+      x.strokeStyle = '#1b1218'; x.lineWidth = 2.2; x.beginPath(); x.arc(cx, this.y + 7, 7, a0, a1); x.stroke();
+      x.strokeStyle = '#a0662c'; x.lineWidth = 1.2; x.beginPath(); x.arc(cx, this.y + 7, 7, a0, a1); x.stroke();
+      x.strokeStyle = 'rgba(245,240,225,0.95)'; x.lineWidth = 0.4; x.beginPath();
+      x.moveTo(cx + Math.cos(a0) * 7, this.y + 7 + Math.sin(a0) * 7); x.lineTo(cx - (face > 0 ? 2 : -2), this.y + 7); x.lineTo(cx + Math.cos(a1) * 7, this.y + 7 + Math.sin(a1) * 7); x.stroke();
+      x.lineCap = 'butt';
     }
 
     drawHorse(x, t) {
       const fr = !this.onGround ? 'b' : ['a', 'b', 'c', 'b'][Math.floor(t * 12) % 4];
       const face = this.face;
       const hx = Math.round(this.x - 3), hy = Math.round(this.y + this.h - 15);
-      const hc = A.get('horse_' + fr, face);
-      // всадник
-      const top = A.get('astamur_' + (this.attackT > 0 ? 'attack' : 'stand'), face);
-      if (top) x.drawImage(top, 0, 0, 16, 12, hx + (face > 0 ? 3 : 5), hy - 9, 16, 12);
-      if (hc) x.drawImage(hc, hx, hy);
+      const rider = A.get('rider_' + (this.attackT > 0 ? 'attack' : fr), face);
+      if (rider) A.blit(x, rider, hx + (rider.ox || 0), hy + (rider.oy || 0));
+      else {
+        const hc = A.get('horse_' + fr, face);
+        const top = A.get('astamur_' + (this.attackT > 0 ? 'attack' : 'stand'), face);
+        if (top) A.blitPart(x, top, 0, 0, 16, 12, hx + (face > 0 ? 3 : 5), hy - 9);
+        if (hc) A.blit(x, hc, hx, hy);
+      }
       if (this.attackT > 0) this.drawSword(x, hx + (face > 0 ? 3 : 5), hy - 9, face, 1.3);
       if (this.shieldT > 0) { x.fillStyle = `rgba(255,224,112,${0.25 + Math.sin(t * 20) * 0.15})`; x.beginPath(); x.arc(this.cx, this.cy, 18, 0, Math.PI * 2); x.fill(); }
     }
@@ -418,7 +427,11 @@
       if (p.shieldT > 0) { this.die('shield', G.sign(this.cx - p.cx)); sfx('stomp'); return; }
       if (this.harmful) p.hurt(this);
     }
-    sprName() { return this.kind + '_' + (Math.abs(this.vx) > 3 ? (Math.floor(this.t * 6) % 2 ? 'run1' : 'run2') : 'stand'); }
+    sprName() {
+      if (Math.abs(this.vx) <= 3) return this.kind + '_stand';
+      if (A.get(this.kind + '_run3')) return this.kind + '_run' + (1 + (Math.floor(this.t * 8) % 4));
+      return this.kind + '_' + (Math.floor(this.t * 6) % 2 ? 'run1' : 'run2');
+    }
     draw(x) {
       if (this.flashT > 0) x.globalAlpha = 0.5;
       this.spr(x, this.sprName(), -3, -1);
@@ -444,8 +457,9 @@
       const c = this.name && A.get(this.name, this.face);
       if (!c) return;
       x.save();
-      if (this.flat) { x.translate(Math.round(this.x - 3), Math.round(this.y + this.h)); x.scale(1, 0.35); x.drawImage(c, 0, -c.height); }
-      else { x.translate(Math.round(this.cx), Math.round(this.cy)); x.scale(1, -1); x.drawImage(c, -c.width / 2, -c.height / 2); }
+      const k = c.k || 1, cw = c.width / k, ch = c.height / k;
+      if (this.flat) { x.translate(G.snap(this.x - 3), G.snap(this.y + this.h)); x.scale(1, 0.35); A.blit(x, c, 0, -ch); }
+      else { x.translate(G.snap(this.cx), G.snap(this.cy)); x.scale(1, -1); A.blit(x, c, -cw / 2, -ch / 2); }
       x.restore();
     }
   }
@@ -468,10 +482,15 @@
       this.patrol(dt, this.up ? this.speed : 0); this.physics(dt);
     }
     extra(x) {
-      const sx = this.face > 0 ? this.x + this.w : this.x - 1;
-      x.fillStyle = '#6a4424';
-      if (this.up) { x.fillRect(Math.round(sx), Math.round(this.y - 10), 1, 22); x.fillStyle = '#d8dde4'; x.fillRect(Math.round(sx) - 1, Math.round(this.y - 14), 3, 5); }
-      else { const y = Math.round(this.y + 7); x.fillRect(Math.round(this.x - 6), y, 22, 1); x.fillStyle = '#d8dde4'; x.fillRect(Math.round(this.face > 0 ? this.x + 16 : this.x - 9), y - 1, 4, 3); }
+      x.save();
+      const hx = this.face > 0 ? this.x + this.w + 0.5 : this.x - 0.5, hy = this.y + 8;
+      x.translate(hx, hy);
+      x.rotate(this.up ? (this.face > 0 ? -1.45 : -1.69) : (this.face > 0 ? 0 : Math.PI));
+      x.fillStyle = '#1b1218'; x.fillRect(-9, -0.8, 23, 1.6);
+      x.fillStyle = '#8a5a30'; x.fillRect(-8.6, -0.45, 22, 0.9);
+      x.fillStyle = '#1b1218'; x.beginPath(); x.moveTo(13, -2.2); x.lineTo(19, 0); x.lineTo(13, 2.2); x.fill();
+      x.fillStyle = '#dfe5ec'; x.beginPath(); x.moveTo(13.4, -1.5); x.lineTo(18, 0); x.lineTo(13.4, 1.5); x.fill();
+      x.restore();
     }
   }
   E.Spearman = Spearman;
@@ -498,10 +517,14 @@
       this.physics(dt);
     }
     extra(x) {
-      const bx = this.face > 0 ? this.x + this.w + 1 : this.x - 2;
-      x.strokeStyle = '#6a3e1a'; x.lineWidth = 2; x.beginPath();
-      if (this.face > 0) x.arc(bx - 3, this.y + 7, 7, -1.1, 1.1); else x.arc(bx + 3, this.y + 7, 7, Math.PI - 1.1, Math.PI + 1.1);
-      x.stroke();
+      const bx = this.face > 0 ? this.x + this.w + 1 : this.x - 1;
+      const cx = this.face > 0 ? bx - 4 : bx + 4, a0 = this.face > 0 ? -1.15 : Math.PI - 1.15, a1 = this.face > 0 ? 1.15 : Math.PI + 1.15;
+      x.lineCap = 'round';
+      x.strokeStyle = '#1b1218'; x.lineWidth = 2.2; x.beginPath(); x.arc(cx, this.y + 7, 7, a0, a1); x.stroke();
+      x.strokeStyle = '#8a5424'; x.lineWidth = 1.2; x.beginPath(); x.arc(cx, this.y + 7, 7, a0, a1); x.stroke();
+      x.strokeStyle = 'rgba(240,235,220,0.9)'; x.lineWidth = 0.4; x.beginPath();
+      x.moveTo(cx + Math.cos(a0) * 7, this.y + 7 + Math.sin(a0) * 7); x.lineTo(cx + Math.cos(a1) * 7, this.y + 7 + Math.sin(a1) * 7); x.stroke();
+      x.lineCap = 'butt';
     }
   }
   E.Archer = Archer;
@@ -544,10 +567,12 @@
       this.patrol(dt, this.speed); this.physics(dt);
     }
     extra(x) {
-      const sx = Math.round(this.face > 0 ? this.x + this.w - 2 : this.x - 5);
-      x.fillStyle = '#1b1218'; x.fillRect(sx - 1, Math.round(this.y + 2), 9, 12);
-      x.fillStyle = '#8a5a30'; x.fillRect(sx, Math.round(this.y + 3), 7, 10);
-      x.fillStyle = '#d8dde4'; x.fillRect(sx + 2, Math.round(this.y + 6), 3, 4);
+      const sx = this.face > 0 ? this.x + this.w + 1 : this.x - 1, sy = this.y + 8;
+      x.fillStyle = '#1b1218'; x.beginPath(); x.ellipse(sx, sy, 3.6, 6.4, 0, 0, 7); x.fill();
+      const g = x.createLinearGradient(sx - 3, sy - 6, sx + 3, sy + 6); g.addColorStop(0, '#b07a42'); g.addColorStop(1, '#5a3418');
+      x.fillStyle = g; x.beginPath(); x.ellipse(sx, sy, 2.9, 5.7, 0, 0, 7); x.fill();
+      x.strokeStyle = '#c9d0d8'; x.lineWidth = 0.6; x.beginPath(); x.ellipse(sx, sy, 2.6, 5.4, 0, 0, 7); x.stroke();
+      x.fillStyle = '#e8edf2'; x.beginPath(); x.arc(sx, sy, 1.3, 0, 7); x.fill();
     }
   }
   E.ShieldBearer = ShieldBearer;
@@ -570,8 +595,8 @@
       const hc = A.get('horse_' + fr, this.face);
       const hx = Math.round(this.x - 3), hy = Math.round(this.y + this.h - 15);
       const top = A.get('soldier_stand', this.face);
-      if (top) x.drawImage(top, 0, 0, 16, 12, hx + (this.face > 0 ? 3 : 5), hy - 9, 16, 12);
-      if (hc) { x.filter = 'grayscale(0.6) brightness(1.3)'; x.drawImage(hc, hx, hy); x.filter = 'none'; }
+      if (top) A.blitPart(x, top, 0, 0, 16, 12, hx + (this.face > 0 ? 3 : 5), hy - 9);
+      if (hc) A.blit(x, hc, hx, hy);
       x.globalAlpha = 1;
     }
   }
@@ -706,9 +731,13 @@
       x.fill();
       super.draw(x, t);
       // факел
-      const tx = Math.round(this.face > 0 ? this.x + this.w : this.x - 2);
-      x.fillStyle = '#5a3a1a'; x.fillRect(tx, Math.round(this.y + 3), 2, 8);
-      x.fillStyle = '#ff8a20'; x.fillRect(tx - 1, Math.round(this.y - 1 + Math.sin(t * 20)), 4, 4);
+      const tx = this.face > 0 ? this.x + this.w + 0.5 : this.x - 1.5;
+      x.fillStyle = '#1b1218'; x.fillRect(tx - 0.3, this.y + 1.7, 1.6, 9);
+      x.fillStyle = '#6a4424'; x.fillRect(tx, this.y + 2, 1, 8.5);
+      const fh = 4 + Math.sin(t * 22) * 0.8;
+      x.fillStyle = 'rgba(255,120,30,0.35)'; x.beginPath(); x.arc(tx + 0.5, this.y + 0.5, 4, 0, 7); x.fill();
+      x.fillStyle = '#ff6a18'; x.beginPath(); x.ellipse(tx + 0.5, this.y + 1.5 - fh / 2, 1.8, fh / 2 + 0.6, 0, 0, 7); x.fill();
+      x.fillStyle = '#ffd860'; x.beginPath(); x.ellipse(tx + 0.5, this.y + 1.8 - fh / 3, 0.9, fh / 3, 0, 0, 7); x.fill();
       if (this.alert > 0.05) {
         x.fillStyle = '#ff3020'; x.font = 'bold 10px sans-serif'; x.fillText(this.alert > 0.6 ? '!' : '?', this.cx - 2, this.y - 6);
       }
@@ -733,12 +762,17 @@
     }
     draw(x, t) {
       const bx = Math.round(this.x), by = Math.round(this.y + this.h);
+      const pc = A.prop(this.burnt ? 'catapult_burnt' : 'catapult', 1);
+      if (pc) { A.blit(x, pc, this.x - 6, by - 44 + 1); this.drawHint(x); return; }
       x.fillStyle = this.burnt ? '#2a1a10' : '#6a4424';
       x.fillRect(bx, by - 8, 40, 5); x.fillRect(bx + 4, by - 20, 4, 14); x.fillRect(bx + 30, by - 20, 4, 14);
       x.fillRect(bx + 4, by - 22, 30, 3);
       x.save(); x.translate(bx + 19, by - 20); x.rotate(this.burnt ? 0.4 : -0.7 + Math.sin(t) * 0.02);
       x.fillRect(-2, -26, 4, 30); x.fillStyle = '#3a2414'; x.fillRect(-5, -30, 10, 5); x.restore();
       x.fillStyle = '#1b1218'; [6, 34].forEach((w) => { x.beginPath(); x.arc(bx + w, by - 3, 4, 0, 7); x.fill(); });
+      this.drawHint(x);
+    }
+    drawHint(x) {
       if (!this.burnt) {
         const p = this.world.player;
         if (p && G.dist(p.cx, p.cy, this.cx, this.cy) < 40) {
@@ -835,7 +869,18 @@
       }
       if (this.lit && Math.random() < 0.3) this.world.burst(this.cx, this.y + 2, 1, ['#ff8030', '#ffd040'], { angle: -Math.PI / 2, spread: 0.3, min: 10, max: 30, g: -40, life: 0.6 });
     }
-    draw(x, t) { this.spr(x, this.lit ? 'fire' + (Math.floor(t * 8) % 3) : 'brazier', 0, 0, 1); }
+    draw(x, t) {
+      const pb = A.prop('brazier', 1);
+      if (!pb) { this.spr(x, this.lit ? 'fire' + (Math.floor(t * 8) % 3) : 'brazier', 0, 0, 1); return; }
+      A.blit(x, pb, this.x, this.y);
+      if (this.lit) {
+        for (let i = 0; i < 3; i++) {
+          const h = 7 + Math.sin(t * 14 + i * 2) * 2.5, w = 6 - i * 1.6;
+          x.fillStyle = ['#e8481e', '#ffa020', '#fff0a0'][i];
+          x.beginPath(); x.ellipse(this.cx, this.y + 8 - h / 2 + i, w / 2 + 1, h / 2, 0, 0, 7); x.fill();
+        }
+      }
+    }
   }
   E.Checkpoint = Checkpoint;
 
@@ -863,6 +908,15 @@
         x.fillStyle = '#5ac8ff'; x.fillRect(bx + 3, by - 14, 26, 3);
         for (let i = 0; i < 3; i++) { const yy = by - 16 - ((t * 20 + i * 9) % 26); x.fillStyle = 'rgba(200,240,255,0.8)'; x.fillRect(bx + 8 + i * 7, yy, 2, 2); }
         this.light = 70;
+        return;
+      }
+      const gp = this.style === 'gate' || !this.style ? A.prop(open ? 'gate' : 'gate_closed', 1) : null;
+      if (gp) {
+        if (open) { x.fillStyle = `rgba(255,230,150,${0.3 + Math.sin(t * 4) * 0.12})`; x.fillRect(bx + 6, by - 36, 20, 36); }
+        A.blit(x, gp, bx - 8, by - 66 + 1);
+        x.fillStyle = '#5a3a1a'; x.fillRect(bx + 15, by - 86, 2, 22);
+        const wv = Math.sin(t * 4) * 2;
+        x.fillStyle = '#c0301a'; x.beginPath(); x.moveTo(bx + 17, by - 86); x.lineTo(bx + 34, by - 82 + wv); x.lineTo(bx + 17, by - 76); x.fill();
         return;
       }
       if (this.style === 'grove') { // священная роща Ажәеиҧшьаа
@@ -902,7 +956,7 @@
       const near = p && Math.abs(p.cx - this.cx) < 30 && Math.abs(p.cy - this.cy) < 30;
       if (near && G.game) G.game.showHint(this.text, this);
     }
-    draw(x) { this.spr(x, 'sign', 0, 0, 1); }
+    draw(x) { const ps = A.prop('sign', 1); if (ps) A.blit(x, ps, this.x, this.y); else this.spr(x, 'sign', 0, 0, 1); }
   }
   E.Sign = Sign;
 

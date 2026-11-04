@@ -441,7 +441,7 @@
 
   /* ---------- 7. Вылазка на Бзоу (скачка) ---------- */
   L.push({
-    id: 'l7', title: 'Вылазка на Бзоу', sub: 'Удар по обозу', hero: 'astamur', theme: 'rain', bg: 'rain', music: 'horse', rain: true, horse: true,
+    id: 'l7', title: 'Вылазка на Бзоу', sub: 'Удар по обозу', hero: 'astamur', theme: 'rain', bg: 'rain', music: 'horse', rain: true, horse: true, night: true,
     objective: { kind: 'count', need: 0, total: 9, label: 'Обозы' },
     signs: ['Бзоу скачет сам: ◀ — придержать, ▶ — вскачь, ▲ — прыжок, ⚔ — сабля. Разбивай обозы!'],
     decor: [['tree', 70, 10], ['tree', 150, 8], ['banner', 296, 10, '#c0301a']],

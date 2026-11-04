@@ -42,7 +42,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   padding: 2px 8px 2px 4px; border-radius: 12px; font-size: 14px; text-shadow: 0 1px 0 #000;
 }
 .hud-chip img { width: 16px; height: 16px; image-rendering: pixelated; }
-.ico-head { width: 18px; height: 18px; display: inline-block; background-size: cover; image-rendering: pixelated; border-radius: 3px; }
+.ico-head { width: 20px; height: 20px; display: inline-block; background-size: cover; background-color: #b86a3a; border-radius: 50%; }
 .hud-btn {
   pointer-events: auto; width: 40px; height: 40px; border-radius: 10px; border: 2px solid rgba(255, 255, 255, 0.35);
   background: rgba(20, 12, 16, 0.5); display: grid; place-items: center; padding: 0;
@@ -93,7 +93,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   background: rgba(20, 12, 16, 0.85); border: 2px solid var(--gold); border-radius: 12px; padding: 6px 12px 6px 6px;
   max-width: min(70vw, 520px); pointer-events: none;
 }
-#say img { width: 44px; height: 44px; border-radius: 8px; image-rendering: pixelated; border: 2px solid var(--ink); }
+#say img { width: 44px; height: 44px; border-radius: 8px; border: 2px solid var(--ink); object-fit: cover; background: radial-gradient(circle at 50% 35%, #f6d9a0, #b86a3a 70%, #5a2a1a); }
 #say b { display: block; color: var(--gold2); font-size: 12px; }
 #say span { font-size: 14px; line-height: 1.25; }
 #banner {
@@ -176,7 +176,7 @@ h1 {
   display: flex; gap: 14px; align-items: flex-start; width: min(94vw, 820px); background: var(--parch); color: var(--ink);
   border: 3px solid var(--ink); border-radius: 14px; padding: 12px; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.5); min-height: 120px;
 }
-#story-img { width: 96px; height: 96px; border-radius: 10px; border: 3px solid var(--ink); image-rendering: pixelated; flex: none; }
+#story-img { width: 96px; height: 96px; border-radius: 10px; border: 3px solid var(--ink); flex: none; object-fit: cover; background: radial-gradient(circle at 50% 35%, #f6d9a0, #b86a3a 70%, #5a2a1a); }
 .story-body { flex: 1; display: flex; flex-direction: column; min-height: 96px; }
 #story-who { color: var(--red); font-size: 15px; letter-spacing: 1px; }
 #story-text { margin: 4px 0 6px; font-size: 17px; line-height: 1.4; flex: 1; }
@@ -196,3 +196,8 @@ h1 {
   .panel { padding: 10px 16px; gap: 6px; }
   .help { font-size: 13px; }
 }
+
+#loading { position: absolute; inset: 0; z-index: 40; background: var(--night); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+#loading p { margin: 0; font-family: "Noto Serif", "Times New Roman", serif; font-size: 34px; letter-spacing: 6px; color: var(--parch); }
+#loading .bar { width: min(60vw, 320px); height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.15); overflow: hidden; }
+#loading .bar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width 0.15s; }
