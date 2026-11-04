@@ -9,6 +9,7 @@
   const H = G.VH;
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   const portraits = {};
+  const log = (...a) => { try { console.info('[anakopia]', ...a); } catch (e) { /* */ } };
   const portrait = (who) => portraits[who] || (portraits[who] = A.portrait(who));
 
   /* Вспышка молнии от пера Аҩы */
@@ -31,6 +32,7 @@
 
     /* ---------- Экраны ---------- */
     show(id) {
+      log('screen', id || 'play', 'state', this.state);
       document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('hidden', s.id !== id));
       const playing = id === null;
       $('hud').classList.toggle('hidden', !playing && id !== 'scr-pause');
@@ -582,6 +584,7 @@
   /* ---------- Android: кнопка «Назад» и сворачивание ---------- */
   window.onAndroidBack = function () {
     const s = game.state;
+    log('back', s);
     if (s === 'play') { game.pause(); return 'ok'; }
     if (s === 'paused') { game.resume(); return 'ok'; }
     if (s === 'story') { game.skipStory(); return 'ok'; }
