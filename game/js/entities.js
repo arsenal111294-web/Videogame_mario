@@ -283,8 +283,9 @@
       x.globalAlpha = 1;
       if (this.power === 'fire' && Math.random() < 0.3) this.world.burst(this.cx + G.rr(-4, 4), this.y + 2, 1, ['#ff8030', '#ffd040'], { angle: -Math.PI / 2, spread: 0.5, min: 10, max: 30, g: -50, life: 0.4 });
       // меч
-      if (this.attackT > 0 && h === 'astamur' && this.power !== 'fire') this.drawSword(x, this.x - 3, this.y - 1, face, 1);
-      if (h === 'amra' && this.attackT > 0) this.drawBow(x, face);
+      const pa = A.painted(h + '_attack');
+      if (this.attackT > 0 && h === 'astamur' && this.power !== 'fire' && !pa) this.drawSword(x, this.x - 3, this.y - 1, face, 1);
+      if (h === 'amra' && this.attackT > 0 && !pa) this.drawBow(x, face);
     }
 
     drawSword(x, sx, sy, face, k) {
@@ -330,7 +331,7 @@
         if (top) A.blitPart(x, top, 0, 0, 16, 12, hx + (face > 0 ? 3 : 5), hy - 9);
         if (hc) A.blit(x, hc, hx, hy);
       }
-      if (this.attackT > 0) this.drawSword(x, hx + (face > 0 ? 3 : 5), hy - 9, face, 1.3);
+      if (this.attackT > 0 && !A.painted('rider_attack')) this.drawSword(x, hx + (face > 0 ? 3 : 5), hy - 9, face, 1.3);
       if (this.shieldT > 0) { x.fillStyle = `rgba(255,224,112,${0.25 + Math.sin(t * 20) * 0.15})`; x.beginPath(); x.arc(this.cx, this.cy, 18, 0, Math.PI * 2); x.fill(); }
     }
   }
@@ -517,6 +518,7 @@
       this.physics(dt);
     }
     extra(x) {
+      if (A.painted(this.kind + '_stand')) return;
       const bx = this.face > 0 ? this.x + this.w + 1 : this.x - 1;
       const cx = this.face > 0 ? bx - 4 : bx + 4, a0 = this.face > 0 ? -1.15 : Math.PI - 1.15, a1 = this.face > 0 ? 1.15 : Math.PI + 1.15;
       x.lineCap = 'round';
@@ -567,6 +569,7 @@
       this.patrol(dt, this.speed); this.physics(dt);
     }
     extra(x) {
+      if (A.painted(this.kind + '_stand')) return;
       const sx = this.face > 0 ? this.x + this.w + 1 : this.x - 1, sy = this.y + 8;
       x.fillStyle = '#1b1218'; x.beginPath(); x.ellipse(sx, sy, 3.6, 6.4, 0, 0, 7); x.fill();
       const g = x.createLinearGradient(sx - 3, sy - 6, sx + 3, sy + 6); g.addColorStop(0, '#b07a42'); g.addColorStop(1, '#5a3418');
@@ -732,12 +735,15 @@
       super.draw(x, t);
       // факел
       const tx = this.face > 0 ? this.x + this.w + 0.5 : this.x - 1.5;
+      if (A.painted('guard_stand')) { x.fillStyle = 'rgba(255,140,40,0.28)'; x.beginPath(); x.arc(tx + this.face * 2, this.y - 1, 6, 0, 7); x.fill(); }
+      else {
       x.fillStyle = '#1b1218'; x.fillRect(tx - 0.3, this.y + 1.7, 1.6, 9);
       x.fillStyle = '#6a4424'; x.fillRect(tx, this.y + 2, 1, 8.5);
       const fh = 4 + Math.sin(t * 22) * 0.8;
       x.fillStyle = 'rgba(255,120,30,0.35)'; x.beginPath(); x.arc(tx + 0.5, this.y + 0.5, 4, 0, 7); x.fill();
       x.fillStyle = '#ff6a18'; x.beginPath(); x.ellipse(tx + 0.5, this.y + 1.5 - fh / 2, 1.8, fh / 2 + 0.6, 0, 0, 7); x.fill();
       x.fillStyle = '#ffd860'; x.beginPath(); x.ellipse(tx + 0.5, this.y + 1.8 - fh / 3, 0.9, fh / 3, 0, 0, 7); x.fill();
+      }
       if (this.alert > 0.05) {
         x.fillStyle = '#ff3020'; x.font = 'bold 10px sans-serif'; x.fillText(this.alert > 0.6 ? '!' : '?', this.cx - 2, this.y - 6);
       }

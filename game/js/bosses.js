@@ -133,11 +133,18 @@
       }
       this.physics(dt);
     }
-    sprName() { return 'master_' + (this.state === 'leap' ? 'jump' : Math.abs(this.vx) > 3 ? (Math.floor(this.t * 6) % 2 ? 'run1' : 'run2') : 'stand'); }
+    sprName() {
+      const p = A.painted('master_stand');
+      if (this.state === 'leap') return 'master_jump';
+      if (this.state === 'recover') return p ? (this.timer > 1.2 ? 'master_attack' : 'master_hurt') : 'master_stand';
+      if (Math.abs(this.vx) > 3) return p ? 'master_run' + (1 + (Math.floor(this.t * 7) % 4)) : (Math.floor(this.t * 6) % 2 ? 'master_run1' : 'master_run2');
+      return 'master_stand';
+    }
     draw(x, t) {
       if (this.flashT > 0 && Math.floor(t * 20) % 2) x.globalAlpha = 0.4;
       this.spr(x, this.sprName(), -6, -2);
       x.globalAlpha = 1;
+      if (A.painted('master_stand')) { if (this.state === 'recover') this.drawStars(x, t); return; }
       // булава
       const hx = this.face > 0 ? this.x + this.w + 2 : this.x - 2, hy = this.y + 18;
       x.fillStyle = '#4a3020'; x.fillRect(hx - 1, hy - 14, 3, 16);
@@ -401,8 +408,11 @@
         }
         if (this.state === 'aim') x.restore();
       } else {
-        const f = this.state === 'raise' ? 'attack' : this.state === 'lunge' ? 'attack' : this.state === 'defeated' ? 'stand' : Math.abs(this.vx) > 3 ? (Math.floor(t * 6) % 2 ? 'run1' : 'run2') : 'stand';
+        const pm = A.painted('marwan_stand');
+        const tired = this.state === 'tired' || this.state === 'stunned' || this.state === 'defeated';
+        const f = this.state === 'raise' || this.state === 'lunge' ? 'attack' : tired && pm ? 'hurt' : Math.abs(this.vx) > 3 ? (pm ? 'run' + (1 + (Math.floor(t * 7) % 4)) : (Math.floor(t * 6) % 2 ? 'run1' : 'run2')) : 'stand';
         this.spr(x, 'marwan_' + f, -6, -2);
+        if (pm) { x.globalAlpha = 1; if (this.vulnerable()) { for (let i = 0; i < 3; i++) { const a = t * 5 + (i * Math.PI * 2) / 3; x.fillStyle = '#ffe070'; x.fillRect(this.cx + Math.cos(a) * 12, this.y - 8 + Math.sin(a) * 3, 3, 3); } } if (this.state === 'raise') { x.fillStyle = '#ff3020'; x.font = 'bold 12px sans-serif'; x.fillText('!', this.cx - 2, this.y - 10); } return; }
         // сабля
         const hx = this.face > 0 ? this.x + this.w + 4 : this.x - 4, hy = this.y + 18;
         x.save(); x.translate(hx, hy); x.rotate(this.state === 'raise' ? -this.face * 1.2 : this.state === 'lunge' ? 0 : this.face * 0.6);

@@ -56,7 +56,7 @@
   function flip(c) {
     const f = cnv(c.width, c.height), x = f.getContext('2d');
     x.translate(c.width, 0); x.scale(-1, 1); x.drawImage(c, 0, 0);
-    f.k = c.k || 1; f.ax = c.ax; f.ay = c.ay;
+    f.k = c.k || 1; f.ax = c.ax; f.ay = c.ay; f.ox = c.ox; f.oy = c.oy; f.painted = c.painted;
     return f;
   }
   A.flip = flip;
@@ -385,14 +385,25 @@
     if (M.ui) for (const n in M.ui) A.icons[n] = 'assets/' + M.ui[n];
     if (M.portraits) A.portraitFiles = Object.assign({}, M.portraits);
     A.paintBg = {};
+    const paintAtlases = [];
     if (M.paint) {
+      for (const key in M.paint.atlases || {}) {
+        const a = M.paint.atlases[key];
+        job(a.file, (im) => paintAtlases.push([im, a]));
+      }
       for (const n in M.paint.bg || {}) job(M.paint.bg[n], (im) => { A.paintBg[n] = im; });
       if (M.paint.title) job(M.paint.title, (im) => { A.paintBg.title = im; });
       // рисованные портреты важнее отрендеренных
       for (const n in M.paint.portraits || {}) A.portraitFiles[n] = M.paint.portraits[n];
     }
-    return Promise.all(jobs).then(() => { A.applyBackgrounds(); return true; });
+    return Promise.all(jobs).then(() => {
+      // рисованные спрайты поверх 3D-рендеров
+      for (const [im, a] of paintAtlases) slice(im, a).forEach(([n, c]) => { c.painted = true; LIB[n] = [c, flip(c)]; });
+      A.applyBackgrounds();
+      return true;
+    });
   };
+  A.painted = (name) => { const s = LIB[name]; return !!(s && s[0].painted); };
   A.prop = (name, face) => { const p = A.props[name]; return p ? p[face < 0 ? 1 : 0] : null; };
 
   /* ---------- Портреты для диалогов ---------- */

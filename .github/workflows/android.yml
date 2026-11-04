@@ -71,8 +71,19 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: anakopia-apk
+      - name: Prepare release file
+        run: cp dist/anakopia.apk Anakopia.apk
       - uses: softprops/action-gh-release@v2
         with:
-          files: |
-            anakopia-gradle.apk
-            dist/anakopia.apk
+          name: Анакопиа ${{ github.ref_name }}
+          make_latest: true
+          files: Anakopia.apk
+          body: |
+            **Анакопиа** — мобильная игра о защите крепости Анакопиа (Android 7.0+).
+
+            Как установить на телефон:
+            1. Откройте эту страницу в браузере на телефоне и нажмите **Anakopia.apk** ниже.
+            2. Когда файл скачается, нажмите «Открыть» — Android предложит **установить** приложение.
+            3. Если появится запрос — разрешите браузеру установку неизвестных приложений.
+
+            Если старая версия уже стоит и установка не идёт — удалите её и поставьте заново.

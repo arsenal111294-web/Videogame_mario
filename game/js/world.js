@@ -239,7 +239,10 @@
       x.save();
       x.translate(-cx, -cy);
       // декорации заднего плана
+      const paintedBg = A.paintBg && A.paintBg[this.def.bg];
       for (const d of this.decor) {
+        // на рисованном фоне свои дома, деревья и шатры — 3D-декорации не дублируем
+        if (paintedBg && /^(house|tree|darktree|tent|cypress)$/.test(d.type)) continue;
         const px = d.x * T, py = (d.y + 1) * T;
         if (px > cx + W + 80 || px < cx - 120) continue;
         A.drawDecor(x, d, px, py, t);

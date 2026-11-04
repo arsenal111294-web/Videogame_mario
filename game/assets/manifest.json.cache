@@ -689,6 +689,286 @@
    "master": "paint/p_master.webp",
    "abnauaiu": "paint/p_abnauaiu.webp"
   },
-  "title": "paint/title.webp"
+  "title": "paint/title.webp",
+  "atlases": {
+   "astamur": {
+    "file": "paint/spr_astamur.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "astamur_stand",
+     "astamur_run1",
+     "astamur_run2",
+     "astamur_run3",
+     "astamur_run4",
+     "astamur_jump",
+     "astamur_attack",
+     "astamur_climb1",
+     "astamur_attackj",
+     "astamur_climb2",
+     "astamur_hurt"
+    ]
+   },
+   "amra": {
+    "file": "paint/spr_amra.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "amra_stand",
+     "amra_run1",
+     "amra_run2",
+     "amra_run3",
+     "amra_run4",
+     "amra_jump",
+     "amra_attack",
+     "amra_climb1",
+     "amra_attackj",
+     "amra_climb2",
+     "amra_hurt"
+    ]
+   },
+   "soldier": {
+    "file": "paint/spr_soldier.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "soldier_stand",
+     "soldier_run1",
+     "soldier_run2",
+     "soldier_run3",
+     "soldier_run4",
+     "soldier_jump",
+     "soldier_attack",
+     "soldier_hurt"
+    ]
+   },
+   "spear": {
+    "file": "paint/spr_spear.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "spear_stand",
+     "spear_run1",
+     "spear_run2",
+     "spear_run3",
+     "spear_run4",
+     "spear_jump",
+     "spear_attack",
+     "spear_hurt"
+    ]
+   },
+   "archer": {
+    "file": "paint/spr_archer.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "archer_stand",
+     "archer_run1",
+     "archer_run2",
+     "archer_run3",
+     "archer_run4",
+     "archer_jump",
+     "archer_attack",
+     "archer_hurt"
+    ]
+   },
+   "shield": {
+    "file": "paint/spr_shield.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "shield_stand",
+     "shield_run1",
+     "shield_run2",
+     "shield_run3",
+     "shield_run4",
+     "shield_jump",
+     "shield_attack",
+     "shield_hurt"
+    ]
+   },
+   "guard": {
+    "file": "paint/spr_guard.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "guard_stand",
+     "guard_run1",
+     "guard_run2",
+     "guard_run3",
+     "guard_run4",
+     "guard_jump",
+     "guard_attack",
+     "guard_hurt"
+    ]
+   },
+   "master": {
+    "file": "paint/spr_master.webp",
+    "cell": [
+     48.0,
+     40.0
+    ],
+    "k": 3,
+    "ox": -8.0,
+    "oy": -8.0,
+    "names": [
+     "master_stand",
+     "master_run1",
+     "master_run2",
+     "master_run3",
+     "master_run4",
+     "master_jump",
+     "master_attack",
+     "master_hurt"
+    ]
+   },
+   "marwan": {
+    "file": "paint/spr_marwan.webp",
+    "cell": [
+     48.0,
+     40.0
+    ],
+    "k": 3,
+    "ox": -8.0,
+    "oy": -8.0,
+    "names": [
+     "marwan_stand",
+     "marwan_run1",
+     "marwan_run2",
+     "marwan_run3",
+     "marwan_run4",
+     "marwan_jump",
+     "marwan_attack",
+     "marwan_hurt"
+    ]
+   },
+   "npc": {
+    "file": "paint/spr_npc.webp",
+    "cell": [
+     24.0,
+     20.0
+    ],
+    "k": 3,
+    "ox": -4,
+    "oy": -4,
+    "names": [
+     "leon_stand",
+     "daur_stand"
+    ]
+   },
+   "rider": {
+    "file": "paint/spr_rider.webp",
+    "cell": [
+     32.0,
+     28.0
+    ],
+    "k": 3,
+    "ox": -4.0,
+    "oy": -12.0,
+    "names": [
+     "rider_a",
+     "rider_b",
+     "rider_c",
+     "rider_stand",
+     "rider_attack"
+    ]
+   },
+   "marwanhorse": {
+    "file": "paint/spr_marwanhorse.webp",
+    "cell": [
+     64.0,
+     56.0
+    ],
+    "k": 3,
+    "ox": -8.0,
+    "oy": -24.0,
+    "names": [
+     "marwanhorse_a",
+     "marwanhorse_b",
+     "marwanhorse_c",
+     "marwanhorse_stand",
+     "marwanhorse_rear"
+    ]
+   },
+   "bat": {
+    "file": "paint/spr_bat.webp",
+    "cell": [
+     22.0,
+     16.0
+    ],
+    "k": 3,
+    "ox": -4.0,
+    "oy": -4.0,
+    "names": [
+     "bat1",
+     "bat2"
+    ]
+   },
+   "boar": {
+    "file": "paint/spr_boar.webp",
+    "cell": [
+     24.0,
+     16.0
+    ],
+    "k": 3,
+    "ox": -2.0,
+    "oy": -4.0,
+    "names": [
+     "boar1",
+     "boar2"
+    ]
+   },
+   "abnauaiu": {
+    "file": "paint/spr_abnauaiu.webp",
+    "cell": [
+     56.0,
+     72.0
+    ],
+    "k": 3,
+    "ox": 0.0,
+    "oy": 0.0,
+    "names": [
+     "abnauaiu_0",
+     "abnauaiu_1",
+     "abnauaiu_2",
+     "abnauaiu_3"
+    ]
+   }
+  }
  }
 }
