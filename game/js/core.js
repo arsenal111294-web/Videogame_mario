@@ -85,6 +85,18 @@
     Escape: 'pause', KeyP: 'pause',
     Enter: 'confirm',
   };
+  // запасная раскладка по e.key: у событий от внешних клавиатур и adb на Android e.code бывает пустым
+  const KEYMAP2 = {
+    arrowleft: 'left', left: 'left', a: 'left', ф: 'left',
+    arrowright: 'right', right: 'right', d: 'right', в: 'right',
+    arrowup: 'up', up: 'up', w: 'up', ц: 'up',
+    arrowdown: 'down', down: 'down', s: 'down', ы: 'down',
+    ' ': 'jump', spacebar: 'jump', z: 'jump', k: 'jump', я: 'jump', л: 'jump',
+    x: 'action', j: 'action', c: 'action', ч: 'action', о: 'action', с: 'action',
+    escape: 'pause', esc: 'pause', p: 'pause', з: 'pause',
+    enter: 'confirm',
+  };
+  const keyOf = (e) => KEYMAP[e.code] || KEYMAP2[(e.key || '').toLowerCase()];
   I.press = function (name) {
     if (!I.down[name]) I.latch[name] = true;
     I.down[name] = true;
@@ -101,7 +113,7 @@
   };
 
   window.addEventListener('keydown', (e) => {
-    const k = KEYMAP[e.code];
+    const k = keyOf(e);
     if (!k) return;
     e.preventDefault();
     if (e.repeat) return;
@@ -110,7 +122,7 @@
     if (G.onKey) G.onKey(k);
   });
   window.addEventListener('keyup', (e) => {
-    const k = KEYMAP[e.code];
+    const k = keyOf(e);
     if (!k) return;
     e.preventDefault();
     I.release(k);
