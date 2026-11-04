@@ -1,0 +1,15 @@
+# Gradle / Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.iml
+# ключи подписи никогда не коммитим
+*.jks
+*.keystore
+*.p12
+# тесты
+test-output/
+node_modules/
+__pycache__/

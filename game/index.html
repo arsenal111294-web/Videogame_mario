@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1b1218">
+<title>Анакопиа</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game" width="427" height="240"></canvas>
+
+  <div id="hud" class="hidden">
+    <div class="hud-row">
+      <div class="hud-left">
+        <span id="hud-hearts"></span>
+        <span class="hud-chip"><span class="ico-head"></span>×<b id="hud-lives">5</b></span>
+        <span class="hud-chip"><img id="ico-coin" alt="">×<b id="hud-coins">0</b></span>
+      </div>
+      <div class="hud-right">
+        <span id="hud-strings"></span>
+        <button id="btn-pause" class="hud-btn" aria-label="Пауза"><svg viewBox="0 0 20 20"><rect x="4" y="3" width="4" height="14" rx="1"/><rect x="12" y="3" width="4" height="14" rx="1"/></svg></button>
+      </div>
+    </div>
+    <div id="hud-objective"></div>
+    <div id="boss-bar" class="hidden"><div id="boss-name"></div><div class="boss-track"><div id="boss-fill"></div></div></div>
+  </div>
+
+  <div id="touch" class="hidden">
+    <div id="stick-zone"><div id="stick-base"><div id="stick-knob"></div></div></div>
+    <button id="btn-action" class="tbtn" aria-label="Удар"><svg viewBox="0 0 32 32"><path d="M6 26 L22 10 L24 4 L28 8 L22 10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 20 L12 26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+    <button id="btn-jump" class="tbtn" aria-label="Прыжок"><svg viewBox="0 0 32 32"><path d="M16 6 L27 19 H20 V26 H12 V19 H5 Z" fill="currentColor"/></svg></button>
+  </div>
+
+  <div id="hint" class="hidden"></div>
+  <div id="say" class="hidden"><img id="say-img" alt=""><div><b id="say-who"></b><span id="say-text"></span></div></div>
+  <div id="banner" class="hidden"><small id="banner-num"></small><h2 id="banner-title"></h2><p id="banner-sub"></p></div>
+  <div id="flashmsg" class="hidden"></div>
+
+  <!-- Экраны -->
+  <section id="scr-title" class="screen">
+    <div class="title-box">
+      <p class="eyebrow">Осада 737 года</p>
+      <h1>АНАКОПИА</h1>
+      <p class="tag">Сказание о крепости, что не склонилась</p>
+      <div class="menu">
+        <button class="btn primary" id="b-continue">Продолжить</button>
+        <button class="btn" id="b-new">Новая игра</button>
+        <button class="btn" id="b-levels">Главы</button>
+        <div class="menu-row">
+          <button class="btn small" id="b-help">Как играть</button>
+          <button class="btn small" id="b-about">Об истории</button>
+          <button class="btn small" id="b-settings">Настройки</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="scr-levels" class="screen hidden">
+    <div class="panel wide">
+      <h2>Главы сказания</h2>
+      <div id="level-list" class="level-grid"></div>
+      <button class="btn small back">Назад</button>
+    </div>
+  </section>
+
+  <section id="scr-help" class="screen hidden">
+    <div class="panel wide scroll">
+      <h2>Как играть</h2>
+      <ul class="help">
+        <li><b>Джойстик</b> слева (в любом месте левой половины экрана) — бег, вверх/вниз по лестницам.</li>
+        <li><b>▲</b> — прыжок. Чем дольше держишь, тем выше прыжок. В воде — всплыть.</li>
+        <li><b>⚔</b> — удар мечом (Астамыр), выстрел из лука (Амра), бросок огня с аџьыкой, поджечь камнемёт.</li>
+        <li>Прыгай врагам на шлемы. Но копейщик с поднятым копьём колется!</li>
+        <li>Щитоносец закрывается щитом спереди — бей сверху или со спины.</li>
+        <li>Золотые тайники бей головой снизу. В них: <b>мёд</b> (+сердце), <b>аџьыка</b> (огонь), <b>щит Шьашәы</b> (неуязвимость), <b>перо Аҩы</b> (гром).</li>
+        <li>Огонь-маяк — контрольная точка. 100 монет — новая жизнь.</li>
+        <li>В каждой главе спрятаны <b>3 струны апхьарцы</b>. Собери все 27!</li>
+        <li>Клавиатура: стрелки/WASD, Пробел — прыжок, X — удар, Esc — пауза.</li>
+      </ul>
+      <button class="btn small back">Назад</button>
+    </div>
+  </section>
+
+  <section id="scr-about" class="screen hidden">
+    <div class="panel wide scroll">
+      <h2>Об истории</h2>
+      <p>Около 737 года арабское войско полководца Марвана ибн Мухаммада прошло через Кавказ и осадило Анакопиа — горную крепость абхазских правителей над рекой Псырҵха (нынешний Афон Ҿыц).</p>
+      <p>Защитники во главе с правителем Леоном выдержали осаду. Войско осаждающих понесло большие потери от болезней и разливов рек и отступило. Победа укрепила Абхазское княжество, а при Леоне II, в конце VIII века, возникло Абхазское царство.</p>
+      <p>Игра — художественное сказание по мотивам этих событий. Астамыр, Амра и старейшина Даур — вымышленные герои. Абнауаю (лесной великан), Аҩы (громовержец), Шьашәы (покровитель кузнецов) и Ажәеиҧшьаа (хозяин лесов и зверей) — образы абхазской мифологии. Апхьарца — абхазский смычковый инструмент, под который пели героические песни.</p>
+      <button class="btn small back">Назад</button>
+    </div>
+  </section>
+
+  <section id="scr-settings" class="screen hidden">
+    <div class="panel">
+      <h2>Настройки</h2>
+      <label class="tog"><input type="checkbox" id="set-music"> Музыка</label>
+      <label class="tog"><input type="checkbox" id="set-sfx"> Звуки</label>
+      <label class="tog"><input type="checkbox" id="set-vibro"> Вибрация</label>
+      <button class="btn small danger" id="b-reset">Сбросить прогресс</button>
+      <button class="btn small back">Назад</button>
+    </div>
+  </section>
+
+  <section id="scr-story" class="screen hidden">
+    <button class="btn tiny" id="b-skip">Пропустить ⏭</button>
+    <div class="story-box" id="story-box">
+      <img id="story-img" alt="">
+      <div class="story-body">
+        <b id="story-who"></b>
+        <p id="story-text"></p>
+        <span class="story-next">коснись, чтобы продолжить ▸</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="scr-pause" class="screen hidden dim">
+    <div class="panel">
+      <h2>Пауза</h2>
+      <p id="pause-level" class="muted"></p>
+      <button class="btn primary" id="b-resume">Продолжить</button>
+      <button class="btn" id="b-restart">Начать главу заново</button>
+      <button class="btn" id="b-toggle-sound">Звук: вкл</button>
+      <button class="btn" id="b-menu">В меню</button>
+    </div>
+  </section>
+
+  <section id="scr-complete" class="screen hidden dim">
+    <div class="panel">
+      <p class="eyebrow" id="cmp-num"></p>
+      <h2 id="cmp-title"></h2>
+      <div class="tally">
+        <div><span>Монеты</span><b id="cmp-coins">0</b></div>
+        <div><span>Очки</span><b id="cmp-score">0</b></div>
+        <div><span>Струны</span><b id="cmp-strings"></b></div>
+      </div>
+      <button class="btn primary" id="b-next">Дальше ▸</button>
+      <button class="btn small" id="b-cmp-menu">В меню</button>
+    </div>
+  </section>
+
+  <section id="scr-over" class="screen hidden dim">
+    <div class="panel">
+      <h2 id="over-title">Песня оборвалась…</h2>
+      <p id="over-text" class="muted">Но сказительница помнит, как было дальше.</p>
+      <button class="btn primary" id="b-retry">Ещё раз</button>
+      <button class="btn" id="b-over-menu">В меню</button>
+    </div>
+  </section>
+
+  <section id="scr-ending" class="screen hidden">
+    <div class="panel wide">
+      <p class="eyebrow">Конец сказания</p>
+      <h2>Анакопиа устояла</h2>
+      <p id="end-stats" class="muted"></p>
+      <p class="credits">Игра «Анакопиа» — всё нарисовано и сыграно кодом.<br>Сюжет по мотивам абхазской истории и фольклора.</p>
+      <button class="btn primary" id="b-end-menu">В меню</button>
+    </div>
+  </section>
+
+  <div id="rotate" class="hidden"><div>⟳</div><p>Поверните устройство горизонтально</p></div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/art.js"></script>
+<script src="js/world.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/bosses.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.apsny.anakopia'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.apsny.anakopia'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Для публикации в магазине замените на собственный ключ (см. README)
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            // Игра лежит в корне репозитория, в папке game/
+            assets.srcDirs = ['../../game']
+        }
+    }
+}
