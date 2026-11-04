@@ -4,6 +4,15 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      release:
+        description: 'Опубликовать релиз с APK'
+        type: boolean
+        default: false
+      version:
+        description: 'Версия релиза (тег)'
+        type: string
+        default: 'v1.0.0'
 
 permissions:
   contents: write
@@ -63,7 +72,7 @@ jobs:
 
   release:
     name: Публикация релиза
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release)
     needs: [build, emulator]
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +84,9 @@ jobs:
         run: cp dist/anakopia.apk Anakopia.apk
       - uses: softprops/action-gh-release@v2
         with:
-          name: Анакопиа ${{ github.ref_name }}
+          tag_name: ${{ inputs.version || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          name: Анакопиа ${{ inputs.version || github.ref_name }}
           make_latest: true
           files: Anakopia.apk
           body: |
