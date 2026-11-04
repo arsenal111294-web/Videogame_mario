@@ -487,16 +487,22 @@
       }
       // фоновая сцена меню и сказаний
       const t = this.time;
-      const bg = this.state === 'story' && this.story ? this.story.bg : 'fortress';
+      const bg = this.state === 'story' && this.story ? this.story.bg : 'title';
       A.drawBackground(ctx, bg, t * 18, 0, W, H, t);
-      // земля из тайлов
-      const gy = H - 30;
-      for (let px = -((t * 18 * 0.9) % 16) - 16; px < W; px += 16) {
+      // земля из тайлов (если нет рисованного фона со своей землёй)
+      const painted = A.paintBg && A.paintBg[bg === 'title' ? 'title' : bg];
+      const gy = painted ? H - 12 : H - 30;
+      if (painted) {
+        const gr = ctx.createLinearGradient(0, H - 60, 0, H);
+        gr.addColorStop(0, 'rgba(10,6,10,0)'); gr.addColorStop(1, 'rgba(10,6,10,0.55)');
+        ctx.fillStyle = gr; ctx.fillRect(0, H - 60, W, 60);
+      }
+      for (let px = -((t * 18 * 0.9) % 16) - 16; !painted && px < W; px += 16) {
         const nb = { up: false, left: true, right: true, down: true };
         A.drawTile(ctx, '#', px, gy, A.THEMES.village, nb, G.rng(7), 'village');
         A.drawTile(ctx, '#', px, gy + 16, A.THEMES.village, { up: true, left: true, right: true, down: true }, G.rng(9), 'village');
       }
-      if (this.state === 'title' || this.state === 'menu' || this.state === 'ending' || this.state === 'boot') {
+      if (!painted && (this.state === 'title' || this.state === 'menu' || this.state === 'ending' || this.state === 'boot')) {
         const run = ['run1', 'run2', 'run3', 'run4'][Math.floor(t * 8) % 4];
         const fr = A.get('astamur_run3') ? run : 'stand';
         const hero = (name, x0, face, f) => {

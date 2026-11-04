@@ -666,5 +666,29 @@
   "master": "portraits/master.webp",
   "narrator": "portraits/narrator.webp",
   "abnauaiu": "portraits/abnauaiu.webp"
+ },
+ "paint": {
+  "bg": {
+   "coast": "paint/coast.webp",
+   "gorge": "paint/gorge.webp",
+   "forest": "paint/forest.webp",
+   "fortress": "paint/fortress.webp",
+   "cave": "paint/cave.webp",
+   "camp": "paint/camp.webp",
+   "rain": "paint/rain.webp",
+   "tower": "paint/tower.webp",
+   "gates": "paint/gates.webp"
+  },
+  "portraits": {
+   "astamur": "paint/p_astamur.webp",
+   "amra": "paint/p_amra.webp",
+   "narrator": "paint/p_narrator.webp",
+   "leon": "paint/p_leon.webp",
+   "daur": "paint/p_daur.webp",
+   "marwan": "paint/p_marwan.webp",
+   "master": "paint/p_master.webp",
+   "abnauaiu": "paint/p_abnauaiu.webp"
+  },
+  "title": "paint/title.webp"
  }
 }

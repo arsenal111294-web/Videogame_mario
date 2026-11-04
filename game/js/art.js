@@ -383,7 +383,14 @@
     }
     for (const n in M.bg || {}) job(M.bg[n], (im) => { A.bgImg[n] = im; });
     if (M.ui) for (const n in M.ui) A.icons[n] = 'assets/' + M.ui[n];
-    if (M.portraits) A.portraitFiles = M.portraits;
+    if (M.portraits) A.portraitFiles = Object.assign({}, M.portraits);
+    A.paintBg = {};
+    if (M.paint) {
+      for (const n in M.paint.bg || {}) job(M.paint.bg[n], (im) => { A.paintBg[n] = im; });
+      if (M.paint.title) job(M.paint.title, (im) => { A.paintBg.title = im; });
+      // рисованные портреты важнее отрендеренных
+      for (const n in M.paint.portraits || {}) A.portraitFiles[n] = M.paint.portraits[n];
+    }
     return Promise.all(jobs).then(() => { A.applyBackgrounds(); return true; });
   };
   A.prop = (name, face) => { const p = A.props[name]; return p ? p[face < 0 ? 1 : 0] : null; };
@@ -765,7 +772,29 @@
     return b;
   };
 
+  /* Рисованный фон: одна картина во всю высоту, повтор с зеркалированием без швов */
+  A.drawPainted = function (x, im, camX, camY, W, H, f, dim) {
+    const h = H * 1.12, w = h * im.width / im.height;
+    let ox = -((camX * f) % (w * 2));
+    if (ox > 0) ox -= w * 2;
+    const oy = -(h - H) * 0.6 - G.clamp(camY * 0.02, -(h - H) * 0.4, (h - H) * 0.4);
+    x.imageSmoothingEnabled = true;
+    let i = 0;
+    for (let px = ox; px < W; px += w, i++) {
+      if (i % 2 === 0) x.drawImage(im, px, oy, w + 0.5, h);
+      else { x.save(); x.translate(px + w, oy); x.scale(-1, 1); x.drawImage(im, 0, 0, w + 0.5, h); x.restore(); }
+    }
+    x.imageSmoothingEnabled = false;
+    if (dim) { x.fillStyle = dim; x.fillRect(0, 0, W, H); }
+  };
+  const PAINT_OF = { coast: 'coast', gorge: 'gorge', forest: 'forest', fortress: 'fortress', cave: 'cave', camp: 'camp', rain: 'rain', tower: 'tower', gates: 'gates', title: 'title' };
+
   A.drawBackground = function (x, name, camX, camY, W, H, t) {
+    const pim = A.paintBg && A.paintBg[PAINT_OF[name]];
+    if (pim) {
+      A.drawPainted(x, pim, camX, camY, W, H, name === 'tower' ? 0.25 : 0.14, name === 'title' ? null : 'rgba(18,12,24,0.16)');
+      return;
+    }
     const b = A.makeBackground(name);
     const g = x.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, b.sky[0]); g.addColorStop(1, b.sky[1]);
