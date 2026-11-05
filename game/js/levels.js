@@ -291,7 +291,7 @@
   /* ---------- 4. Стены Анакопии (оборона) ---------- */
   L.push({
     id: 'l4', title: 'Стены Анакопии', sub: 'Первый штурм', hero: 'astamur', theme: 'fortress', bg: 'fortress', music: 'siege', mode: 'siege',
-    wallCols: 9, wallTopRow: 6, groundRow: 13, duration: 75,
+    wallCols: 9, wallTopRow: 6, groundRow: 13, duration: 75, viewH: 208,
     intro: [
       ['leon', 'Вы принесли весть вовремя, дети Псырҵха. Но враг уже у подножия.'],
       ['leon', 'Я — Леон, Аҧсҳа, правитель Аҧсны. Эта крепость не падёт, пока на её стенах стоит хоть один из нас. Астамыр — на стену!'],
@@ -441,7 +441,7 @@
 
   /* ---------- 7. Вылазка на Бзоу (скачка) ---------- */
   L.push({
-    id: 'l7', title: 'Вылазка на Бзоу', sub: 'Удар по обозу', hero: 'astamur', theme: 'rain', bg: 'rain', music: 'horse', rain: true, horse: true, night: true,
+    id: 'l7', title: 'Вылазка на Бзоу', sub: 'Удар по обозу', hero: 'astamur', theme: 'rain', bg: 'rain', music: 'horse', rain: true, horse: true, night: true, viewH: 160,
     objective: { kind: 'count', need: 0, total: 9, label: 'Обозы' },
     signs: ['Бзоу скачет сам: ◀ — придержать, ▶ — вскачь, ▲ — прыжок, ⚔ — сабля. Разбивай обозы!'],
     decor: [['tree', 70, 10], ['tree', 150, 8], ['banner', 296, 10, '#c0301a']],
@@ -590,7 +590,7 @@
 
   /* ---------- 9. Марван (битва у ворот) ---------- */
   L.push({
-    id: 'l9', title: 'Марван', sub: 'Битва у ворот', hero: 'astamur', theme: 'gates', bg: 'gates', music: 'boss', closedTop: true, boss: true,
+    id: 'l9', title: 'Марван', sub: 'Битва у ворот', hero: 'astamur', theme: 'gates', bg: 'gates', music: 'boss', closedTop: true, boss: true, viewH: 160,
     map: () => [
       'S................................S',
       'S................................S',

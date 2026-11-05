@@ -694,12 +694,12 @@
    "astamur": {
     "file": "paint/spr_astamur.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "astamur_stand",
      "astamur_run1",
@@ -717,12 +717,12 @@
    "amra": {
     "file": "paint/spr_amra.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "amra_stand",
      "amra_run1",
@@ -740,12 +740,12 @@
    "soldier": {
     "file": "paint/spr_soldier.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "soldier_stand",
      "soldier_run1",
@@ -760,12 +760,12 @@
    "spear": {
     "file": "paint/spr_spear.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "spear_stand",
      "spear_run1",
@@ -780,12 +780,12 @@
    "archer": {
     "file": "paint/spr_archer.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "archer_stand",
      "archer_run1",
@@ -800,12 +800,12 @@
    "shield": {
     "file": "paint/spr_shield.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "shield_stand",
      "shield_run1",
@@ -820,12 +820,12 @@
    "guard": {
     "file": "paint/spr_guard.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "guard_stand",
      "guard_run1",
@@ -840,12 +840,12 @@
    "master": {
     "file": "paint/spr_master.webp",
     "cell": [
-     48.0,
-     40.0
+     52.0,
+     46.0
     ],
-    "k": 3,
-    "ox": -8.0,
-    "oy": -8.0,
+    "k": 4,
+    "ox": -10.0,
+    "oy": -14.0,
     "names": [
      "master_stand",
      "master_run1",
@@ -860,12 +860,12 @@
    "marwan": {
     "file": "paint/spr_marwan.webp",
     "cell": [
-     48.0,
-     40.0
+     52.0,
+     46.0
     ],
-    "k": 3,
-    "ox": -8.0,
-    "oy": -8.0,
+    "k": 4,
+    "ox": -10.0,
+    "oy": -14.0,
     "names": [
      "marwan_stand",
      "marwan_run1",
@@ -880,12 +880,12 @@
    "npc": {
     "file": "paint/spr_npc.webp",
     "cell": [
-     24.0,
-     20.0
+     26.0,
+     23.0
     ],
-    "k": 3,
-    "ox": -4,
-    "oy": -4,
+    "k": 4,
+    "ox": -5.0,
+    "oy": -7.0,
     "names": [
      "leon_stand",
      "daur_stand"
@@ -894,12 +894,12 @@
    "rider": {
     "file": "paint/spr_rider.webp",
     "cell": [
-     32.0,
-     28.0
+     36.0,
+     32.0
     ],
-    "k": 3,
-    "ox": -4.0,
-    "oy": -12.0,
+    "k": 4,
+    "ox": -6.0,
+    "oy": -16.0,
     "names": [
      "rider_a",
      "rider_b",
@@ -911,12 +911,12 @@
    "marwanhorse": {
     "file": "paint/spr_marwanhorse.webp",
     "cell": [
-     64.0,
-     56.0
+     70.0,
+     62.0
     ],
-    "k": 3,
-    "ox": -8.0,
-    "oy": -24.0,
+    "k": 4,
+    "ox": -11.0,
+    "oy": -30.0,
     "names": [
      "marwanhorse_a",
      "marwanhorse_b",
@@ -931,7 +931,7 @@
      22.0,
      16.0
     ],
-    "k": 3,
+    "k": 4,
     "ox": -4.0,
     "oy": -4.0,
     "names": [
@@ -942,12 +942,12 @@
    "boar": {
     "file": "paint/spr_boar.webp",
     "cell": [
-     24.0,
-     16.0
+     28.0,
+     18.0
     ],
-    "k": 3,
-    "ox": -2.0,
-    "oy": -4.0,
+    "k": 4,
+    "ox": -4.0,
+    "oy": -6.0,
     "names": [
      "boar1",
      "boar2"
@@ -959,7 +959,7 @@
      56.0,
      72.0
     ],
-    "k": 3,
+    "k": 4,
     "ox": 0.0,
     "oy": 0.0,
     "names": [

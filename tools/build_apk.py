@@ -21,8 +21,8 @@ import zipfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PKG = 'com.apsny.anakopia'
 APP_LABEL = 'Анакопиа'
-VERSION_CODE = 1
-VERSION_NAME = '1.0'
+VERSION_CODE = 2
+VERSION_NAME = '1.1'
 MIN_SDK = 24
 TARGET_SDK = 34
 ANDROID_NS = 'http://schemas.android.com/apk/res/android'

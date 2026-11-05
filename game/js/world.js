@@ -220,7 +220,13 @@
         const tx = target.x + target.w / 2 - W / 2 + look;
         this.camX = G.lerp(this.camX, tx, Math.min(1, dt * 6));
       }
-      const ty = target.y + target.h / 2 - H * 0.55;
+      // кадр держится по последней опоре героя: прыжки не дёргают камеру
+      const cy = target.y + target.h / 2;
+      if (target.onGround || target.state === 'climb' || target.inWater || this.camAnchorY === undefined) this.camAnchorY = cy;
+      let ty = this.camAnchorY - H * 0.72;
+      const sy = cy - this.camY;
+      if (sy < H * 0.28) ty = Math.min(ty, cy - H * 0.28);
+      if (sy > H * 0.86) ty = Math.max(ty, cy - H * 0.86);
       if (this.ph <= H) this.camY = this.ph - H;
       else this.camY = G.lerp(this.camY, ty, Math.min(1, dt * 5));
       if (this.pw <= W) this.camX = -(W - this.pw) / 2;

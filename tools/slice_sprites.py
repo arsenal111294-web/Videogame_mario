@@ -16,7 +16,7 @@ from scipy import ndimage
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'game', 'assets')
 CACHE = os.path.join(OUT, 'manifest.json.cache')
-K = 3
+K = 4  # пикселей на игровую единицу (совпадает с G.RES)
 OUTLINE = (30, 20, 26)
 
 

@@ -4,9 +4,17 @@
   const G = window.G, A = G.art, E = G.ent, T = G.T, I = G.input;
   const $ = (id) => document.getElementById(id);
   const canvas = $('game');
-  const ctx = canvas.getContext('2d');
+  // холст без прозрачности и с низкой задержкой вывода (быстрее реагирует на касания)
+  let ctx = canvas.getContext('2d', { alpha: false, desynchronized: true }) || canvas.getContext('2d');
   let W = 427;
-  const H = G.VH;
+  let H = G.VH;
+  const MENU_VIEW = 176;
+  /* Высота кадра в игровых единицах: крупный план в обычных главах, шире там, где нужен обзор */
+  function setView(h) {
+    if (G.VH === h && H === h) return;
+    G.VH = h; H = h;
+    resize();
+  }
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   const portraits = {};
   const log = (...a) => { try { console.info('[anakopia]', ...a); } catch (e) { /* */ } };
@@ -43,6 +51,7 @@
 
     toTitle() {
       this.state = 'title'; this.world = null;
+      setView(MENU_VIEW);
       this.show('scr-title');
       const sv = G.save.data;
       $('b-continue').classList.toggle('hidden', !(sv.unlocked > 1));
@@ -106,6 +115,7 @@
       const def0 = G.LEVELS[i];
       const def = Object.assign({}, def0);
       this.idx = i;
+      setView(def.viewH || 136);
       this.buildWorld(def);
       this.state = 'play';
       this.deathT = 0; this.doneT = 0; this.completing = false;
@@ -183,7 +193,7 @@
       const p = w.player;
       w.camX = p.x - W / 2; w.camY = p.y - H / 2;
       w.updateCamera(p, W, H, 1);
-      if (def.mode === 'siege') { w.camX = 0; w.camY = 0; }
+      if (def.mode === 'siege') { w.camX = 0; w.camY = Math.max(0, w.ph - H); }
       return w;
     },
 
@@ -417,6 +427,7 @@
       if (this.state !== 'play') return;
       const w = this.world, p = w.player, def = w.def;
       w.time += dt;
+      w.viewW = W;
       const camL = w.camX - 200, camR = w.camX + W + 200, camT = w.camY - 200, camB = w.camY + H + 200;
       const list = w.entities;
       for (let i = 0, n = list.length; i < n; i++) {
@@ -430,7 +441,7 @@
       w.updateParticles(dt);
       if (list.some((e) => e.dead)) w.entities = list.filter((e) => !e.dead);
       // камера
-      if (def.mode === 'siege') { w.camX = 0; w.camY = 0; }
+      if (def.mode === 'siege') { w.camX = 0; w.camY = Math.max(0, w.ph - H); }
       else if (def.autoscroll) {
         if (w.scrollDelay > 0) w.scrollDelay -= dt;
         else if (!p.dead) w.scrollX = Math.min(w.pw - W, w.scrollX + def.autoscroll * dt);
@@ -524,7 +535,7 @@
   function resize() {
     const vw = window.innerWidth, vh = window.innerHeight;
     const aspect = vw / Math.max(1, vh);
-    W = G.clamp(Math.round(H * aspect), 320, 600);
+    W = G.clamp(Math.round(H * aspect), 260, 600);
     canvas.width = W * G.RES; canvas.height = H * G.RES;
     ctx.imageSmoothingEnabled = false;
     $('rotate').classList.toggle('hidden', aspect >= 1.05);
@@ -534,9 +545,26 @@
 
   /* ---------- Цикл ---------- */
   let last = performance.now(), acc = 0;
+  /* Автокачество: если телефон не держит ~45 кадров/с, снижаем плотность холста */
+  let perfT = 0, perfN = 0, perfSum = 0;
+  function adaptQuality(dt) {
+    if (game.state !== 'play') { perfT = 0; perfN = 0; perfSum = 0; return; }
+    perfT += dt; perfN++; perfSum += dt;
+    if (perfT < 2.5) return;
+    const avg = perfSum / perfN;
+    perfT = 0; perfN = 0; perfSum = 0;
+    if (avg > 1 / 45 && G.RES > 2) {
+      G.RES--;
+      resize();
+      if (game.world) game.world.prerender();
+      console.info('[anakopia] качество снижено: RES', G.RES, 'кадр', Math.round(avg * 1000), 'мс');
+    }
+  }
+
   function frame(now) {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
+    adaptQuality(dt);
     acc += dt;
     let steps = 0;
     while (acc >= G.STEP && steps < 6) {

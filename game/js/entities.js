@@ -57,6 +57,7 @@
       if (this.attackCd > 0) this.attackCd -= dt;
       if (this.lockX > 0) this.lockX -= dt;
       if (this.boostT > 0) this.boostT -= dt;
+      this.jumpT = (this.jumpT === undefined ? 1 : this.jumpT) + dt;
       this.interact = false;
       if (I.pressed('jump')) this.jumpBuf = 0.12; else if (this.jumpBuf > 0) this.jumpBuf -= dt;
 
@@ -110,7 +111,7 @@
       // --- гравитация ---
       let g, maxFall = 380;
       if (inWater) { g = 320; maxFall = 80; }
-      else if (this.vy < 0 && (I.held('jump') || this.boostT > 0)) g = 720;
+      else if (this.vy < 0 && (I.held('jump') || this.boostT > 0 || this.jumpT < 0.11)) g = 720;
       else if (this.vy < 0) g = 1800;
       else g = 1100;
       // скольжение по стене (Амра)
@@ -127,7 +128,7 @@
       // --- прыжок ---
       if (this.jumpBuf > 0) {
         if (this.onGround || this.coyote > 0) {
-          this.vy = this.horse ? -335 : -320; this.jumpBuf = 0; this.coyote = 0; this.onGround = false;
+          this.vy = this.horse ? -335 : -320; this.jumpBuf = 0; this.coyote = 0; this.onGround = false; this.jumpT = 0;
           sfx('jump'); W.burst(this.cx, this.y + this.h, 4, ['#d8c8a8', '#fff'], { min: 10, max: 40, life: 0.3, g: 0 });
         } else if (inWater) {
           this.vy = -160; this.jumpBuf = 0; sfx('splash');

@@ -654,7 +654,7 @@
     spawn(kind) {
       const W = this.world;
       const s = new SiegeSoldier(W.pw - 14, this.groundY - 14, kind, this);
-      if (kind === 'archer') s.archerX = G.rr(this.wallRight + 120, W.pw - 30);
+      if (kind === 'archer') s.archerX = G.rr(this.wallRight + 90, Math.min(W.pw, W.viewW || W.pw) - 28);
       W.add(s);
     }
     update(dt) {

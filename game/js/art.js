@@ -65,7 +65,10 @@
   A.blit = function (x, c, dx, dy) {
     if (!c) return;
     const k = c.k || 1;
+    // детальные (рисованные/3D) спрайты масштабируются со сглаживанием, пиксельные — чётко
+    if (k >= 2) x.imageSmoothingEnabled = true;
     x.drawImage(c, G.snap(dx), G.snap(dy), c.width / k, c.height / k);
+    if (k >= 2) x.imageSmoothingEnabled = false;
   };
   A.blitPart = function (x, c, sx, sy, sw, sh, dx, dy) {
     if (!c) return;
@@ -510,6 +513,7 @@
     if (n === 'stone') {
       const bx = ((tx % 2) + 2) % 2, by = ((ty % 2) + 2) % 2;
       x.drawImage(im, bx * T * k, by * T * k, T * k, T * k, px, py, T, T);
+      x.fillStyle = 'rgba(58,44,40,0.34)'; x.fillRect(px, py, T, T); // кладка темнее, в тон рисованным фонам
     } else x.drawImage(im, 0, 0, im.width, im.height, px, py, T, T);
     return true;
   };
